@@ -2,36 +2,95 @@ package resolvers
 
 import (
 	"context"
+	"proximity/graph/entity"
 	"proximity/graph/model"
 	"proximity/graph/repositories"
-	"time"
+	"proximity/graph/utils"
+
+	"github.com/google/uuid"
 )
 
 type ChatResolver struct {
-	ChatRepo *repositories.ChatRepo
+	ChatRepo        *repositories.ChatRepo
+	ParticipantRepo *repositories.ParticipantRepo
 }
 
-func (rsv *ChatResolver) CreateTemporaryChat(ctx context.Context) (*model.Chat, error) {
-	chat := model.Chat{}
-	chat.CreatedAt = time.Now()
-	chat.UpdatedAt = time.Now()
-
-	err := rsv.ChatRepo.BaseRepo.Insert(chat)
+func (rsv *ChatResolver) CreateTemporaryChat(ctx context.Context, userID string) (*model.Chat, error) {
+	userId, err := uuid.Parse(userID)
 	if err != nil {
 		return nil, err
 	}
-	return &chat, nil
+	chat := entity.Chat{UserID: userId}
+	rs, err := rsv.ChatRepo.Insert(ctx, &chat)
+	if err != nil {
+		return nil, err
+	}
+	return utils.ToChatModel(rs)
 }
 
-func (rs *ChatResolver) ConnectChatToUsers(ctx context.Context, chatID uint, userID uint, targetID string) (*model.Chat, error) {
-	chat, err := rs.ChatRepo.FindById(ctx, chatID)
+func (rsv *ChatResolver) ConnectChatToUsers(ctx context.Context, chatID string, userID string, targetID string) (*model.Chat, error) {
+	chatId, _ := uuid.Parse(chatID)
+	userId, _ := uuid.Parse(userID)
+	targetId, _ := uuid.Parse(targetID)
+
+	err := rsv.ParticipantRepo.ConnectChatToUsers(ctx, chatId, userId, targetId)
 	if err != nil {
 		return nil, err
 	}
 
-	return chat, nil
+	return rsv.Chat(ctx, chatID)
 }
 
-func (rsv *ChatResolver) AddChatMessage(ctx context.Context, chatID string, authorID string, body string) (*model.Chat, error) {
-	panic("")
+func (rsv *ChatResolver) FindAllByUserId(ctx context.Context, userId string) ([]*model.Chat, error) {
+	parsedUserId, _ := uuid.Parse(userId)
+	rs, err := rsv.ChatRepo.FindAllByUserId(ctx, parsedUserId)
+	if err != nil {
+		return nil, err
+	}
+	return utils.ToChatModels(rs)
+}
+
+func (rsv *ChatResolver) DeleteChat(ctx context.Context, chatID string) (*model.Chat, error) {
+	chatId, err := uuid.Parse(chatID)
+	if err != nil {
+		return nil, err
+	}
+
+	rs, err := rsv.ChatRepo.DeleteChat(ctx, chatId)
+	if err != nil {
+		return nil, err
+	}
+	return utils.ToChatModel(rs)
+}
+
+func (rsv *ChatResolver) Chat(ctx context.Context, chatID string) (*model.Chat, error) {
+	chatId, err := uuid.Parse(chatID)
+	if err != nil {
+		return nil, err
+	}
+
+	rs, err := rsv.ChatRepo.FindById(ctx, chatId)
+	if err != nil {
+		return nil, err
+	}
+
+	return utils.ToChatModel(rs)
+}
+
+func (rsv *ChatResolver) ChatExists(ctx context.Context, userID string, targetID string) (*model.Chat, error) {
+	userId, err := uuid.Parse(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	targetId, err := uuid.Parse(targetID)
+	if err != nil {
+		return nil, err
+	}
+
+	rs, err := rsv.ChatRepo.ChatExists(ctx, userId, targetId)
+	if err != nil {
+		return nil, nil
+	}
+	return utils.ToChatModel(rs)
 }

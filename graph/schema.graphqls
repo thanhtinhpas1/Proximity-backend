@@ -4,55 +4,55 @@ type Query {
   signIn(token: String!): User!
 
   #
-  user(userId: Int!): User!
+  user(userId: String!): User!
 
   #
-  userConnections(userId: Int!, type: ConnectionsType!): [User!]
+  userConnections(userId: String!, type: ConnectionsType!): [User!]
 
   #
   userExists(token: String): Boolean!
 
   #
-  notifications(userId: Int!): [Notification!]!
+  notifications(userId: String!): [Notification!]!
 
   #
-  chat(chatId: Int!): Chat!
+  chat(chatId: String!): Chat!
 
   #
-  chats(userId: Int!): [Chat!]!
+  chats(userId: String!): [Chat!]!
 
   #
-  doesFollow(userId: Int!, targetId: String!): Boolean!
+  doesFollow(userId: String!, targetId: String!): Boolean!
 
   #
-  chatExists(userId: Int!, targetId: String!): Chat
+  chatExists(userId: String!, targetId: String!): Chat
 
   #
-  searchUsers(userId: Int!, name: String!): [User!]!
+  searchUsers(userId: String!, name: String!): [User!]!
 
   #
-  isHandleAvailable(userId: Int!, handle: String!): Boolean!
+  isHandleAvailable(userId: String!, handle: String!): Boolean!
 
   #
-  post(postId: Int!): Post!
+  post(postId: String!): Post!
 
   #
-  posts(userId: Int!, last: Int!): [Post!]
+  posts(userId: String!, last: Int!): [Post!]
 
   #
-  userFeed(userId: Int!): [Post!]
+  userFeed(userId: String!): [Post!]
 
   #
   likeUsers(likes: [String!]): [User!]
 
   #
-  blockedUsers(userId: Int!): [User!]
+  blockedUsers(userId: String!): [User!]
 }
 
 #
 type User {
   #
-  id: Int!
+  id: ID!
 
   #
   token: String!
@@ -100,7 +100,7 @@ type User {
 #
 type Post {
   #
-  id: Int!
+  id: ID!
 
   #
   caption: String
@@ -130,7 +130,7 @@ scalar DateTime
 #
 type Comment {
   #
-  id: Int!
+  id: ID!
 
   #
   body: String!
@@ -145,7 +145,7 @@ type Comment {
 #
 type Story {
   #
-  id: Int!
+  id: ID!
 
   #
   createdAt: DateTime!
@@ -178,7 +178,7 @@ enum StoryType {
 #
 type Chat {
   #
-  id: Int!
+  id: ID!
 
   #
   createdAt: DateTime!
@@ -196,7 +196,7 @@ type Chat {
 #
 type Message {
   #
-  id: Int!
+  id: ID!
 
   #
   type: MessageType!
@@ -232,7 +232,7 @@ enum MessageType {
 #
 type Notification {
   #
-  id: Int!
+  id: ID!
 
   #
   resourceId: String!
@@ -283,7 +283,7 @@ type Mutation {
 
   #
   updateUser(
-    userId: Int!
+    userId: String!
     avatar: String!
     name: String!
     handle: String!
@@ -291,56 +291,56 @@ type Mutation {
   ): User!
 
   #
-  createTemporaryChat: Chat!
+  createTemporaryChat(userId: String!): Chat!
 
   #
-  connectChatToUsers(chatId: Int!, userId: String!, targetId: String!): Chat!
+  connectChatToUsers(chatId: String!, userId: String!, targetId: String!): Chat!
 
   #
-  addChatMessage(chatId: Int!, authorId: String!, body: String!): Chat!
+  addChatMessage(chatId: String!, authorId: String!, body: String!): Chat!
 
   #
   updateFollowing(
-    userId: Int!
+    userId: String!
     targetId: String!
     action: UpdateFollowingAction!
   ): Boolean!
 
   #
-  createPost(userId: Int!, uri: String!, caption: String): Post!
+  createPost(userId: String!, uri: String!, caption: String): Post!
 
   #
-  updateFcmToken(userId: Int!, fcmToken: String!): User!
+  updateFcmToken(userId: String!, fcmToken: String!): User!
 
   #
-  addComment(userId: Int!, postId: Int!, body: String!): Post!
+  addComment(userId: String!, postId: String!, body: String!): Post!
 
   #
-  likeInteraction(userId: Int!, postId: Int!, action: LikeAction!): Post!
+  likeInteraction(userId: String!, postId: String!, action: LikeAction!): Post!
 
   #
-  messageSeen(messageId: Int!): Message!
+  messageSeen(messageId: String!): Message!
 
   #
-  updateLastSeen(userId: Int!): User!
+  updateLastSeen(userId: String!): User!
 
   #
-  deleteChat(chatId: Int!): Chat!
+  deleteChat(chatId: String!): Chat!
 
   #
-  reportPost(postId: Int!): Post!
+  reportPost(postId: String!): Post!
 
   #
-  editPost(postId: Int!, caption: String!): Post!
+  editPost(postId: String!, caption: String!): Post!
 
   #
-  deletePost(postId: Int!): Post!
+  deletePost(postId: String!): Post!
 
   #
-  deleteComment(postId: Int!, commentId: Int!): Post!
+  deleteComment(postId: String!, commentId: String!): Post!
 
   #
-  deleteNotification(notificationId: Int!): Notification!
+  deleteNotification(notificationId: String!): Notification!
 
   #
   blockUser(from: String!, to: String!): Boolean!
@@ -370,19 +370,19 @@ enum LikeAction {
 #
 type Subscription {
   #
-  chat(chatId: Int!): Chat!
+  chat(chatId: String!): Chat!
 
   #
-  post(postId: Int!): Post!
+  post(postId: String!): Post!
 
   #
-  user(userId: Int!): User!
+  user(userId: String!): User!
 }
 
 #
 type BlockList {
   #
-  id: Int!
+  id: ID!
 
   #
   from: String!

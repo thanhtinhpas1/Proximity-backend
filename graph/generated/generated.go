@@ -82,7 +82,7 @@ type ComplexityRoot struct {
 		BlockUser           func(childComplexity int, from string, to string) int
 		ConnectChatToUsers  func(childComplexity int, chatID string, userID string, targetID string) int
 		CreatePost          func(childComplexity int, userID string, uri string, caption *string) int
-		CreateTemporaryChat func(childComplexity int) int
+		CreateTemporaryChat func(childComplexity int, userID string) int
 		CreateUser          func(childComplexity int, token string, avatar *string, name string, email string) int
 		DeleteChat          func(childComplexity int, chatID string) int
 		DeleteComment       func(childComplexity int, postID string, commentID string) int
@@ -175,9 +175,9 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	CreateUser(ctx context.Context, token string, avatar *string, name string, email string) (*model.User, error)
-	UpdateUser(ctx context.Context, userID uint, avatar string, name string, handle string, about string) (*model.User, error)
-	CreateTemporaryChat(ctx context.Context) (*model.Chat, error)
-	ConnectChatToUsers(ctx context.Context, chatID uint, userID uint, targetID string) (*model.Chat, error)
+	UpdateUser(ctx context.Context, userID string, avatar string, name string, handle string, about string) (*model.User, error)
+	CreateTemporaryChat(ctx context.Context, userID string) (*model.Chat, error)
+	ConnectChatToUsers(ctx context.Context, chatID string, userID string, targetID string) (*model.Chat, error)
 	AddChatMessage(ctx context.Context, chatID string, authorID string, body string) (*model.Chat, error)
 	UpdateFollowing(ctx context.Context, userID string, targetID string, action model.UpdateFollowingAction) (bool, error)
 	CreatePost(ctx context.Context, userID string, uri string, caption *string) (*model.Post, error)
@@ -437,7 +437,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Mutation.CreateTemporaryChat(childComplexity), true
+		args, err := ec.field_Mutation_createTemporaryChat_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateTemporaryChat(childComplexity, args["userId"].(string)), true
 
 	case "Mutation.createUser":
 		if e.complexity.Mutation.CreateUser == nil {
@@ -1461,7 +1466,7 @@ type Mutation {
   ): User!
 
   #
-  createTemporaryChat: Chat!
+  createTemporaryChat(userId: String!): Chat!
 
   #
   connectChatToUsers(chatId: String!, userId: String!, targetId: String!): Chat!
@@ -1736,6 +1741,21 @@ func (ec *executionContext) field_Mutation_createPost_args(ctx context.Context, 
 		}
 	}
 	args["caption"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createTemporaryChat_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["userId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["userId"] = arg0
 	return args, nil
 }
 
@@ -3200,7 +3220,7 @@ func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateUser(rctx, args["userId"].(uint), args["avatar"].(string), args["name"].(string), args["handle"].(string), args["about"].(string))
+		return ec.resolvers.Mutation().UpdateUser(rctx, args["userId"].(string), args["avatar"].(string), args["name"].(string), args["handle"].(string), args["about"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3233,9 +3253,16 @@ func (ec *executionContext) _Mutation_createTemporaryChat(ctx context.Context, f
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createTemporaryChat_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateTemporaryChat(rctx)
+		return ec.resolvers.Mutation().CreateTemporaryChat(rctx, args["userId"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3277,7 +3304,7 @@ func (ec *executionContext) _Mutation_connectChatToUsers(ctx context.Context, fi
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().ConnectChatToUsers(rctx, args["chatId"].(uint), args["userId"].(uint), args["targetId"].(string))
+		return ec.resolvers.Mutation().ConnectChatToUsers(rctx, args["chatId"].(string), args["userId"].(string), args["targetId"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
