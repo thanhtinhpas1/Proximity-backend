@@ -1,0 +1,392 @@
+#
+type Query {
+  #
+  signIn(token: String!): User!
+
+  #
+  user(userId: Int!): User!
+
+  #
+  userConnections(userId: Int!, type: ConnectionsType!): [User!]
+
+  #
+  userExists(token: String): Boolean!
+
+  #
+  notifications(userId: Int!): [Notification!]!
+
+  #
+  chat(chatId: Int!): Chat!
+
+  #
+  chats(userId: Int!): [Chat!]!
+
+  #
+  doesFollow(userId: Int!, targetId: String!): Boolean!
+
+  #
+  chatExists(userId: Int!, targetId: String!): Chat
+
+  #
+  searchUsers(userId: Int!, name: String!): [User!]!
+
+  #
+  isHandleAvailable(userId: Int!, handle: String!): Boolean!
+
+  #
+  post(postId: Int!): Post!
+
+  #
+  posts(userId: Int!, last: Int!): [Post!]
+
+  #
+  userFeed(userId: Int!): [Post!]
+
+  #
+  likeUsers(likes: [String!]): [User!]
+
+  #
+  blockedUsers(userId: Int!): [User!]
+}
+
+#
+type User {
+  #
+  id: Int!
+
+  #
+  token: String!
+
+  #
+  fcmToken: String
+
+  #
+  name: String!
+
+  #
+  handle: String!
+
+  #
+  avatar: String
+
+  #
+  email: String!
+
+  #
+  lastSeen: Float!
+
+  #
+  about: String
+
+  #
+  posts: [Post!]
+
+  #
+  stories: [Story!]
+
+  #
+  following: [User!]
+
+  #
+  followers: [User!]
+
+  #
+  chats: [Chat!]
+
+  #
+  notifications: [Notification!]
+}
+
+#
+type Post {
+  #
+  id: Int!
+
+  #
+  caption: String
+
+  #
+  uri: String!
+
+  #
+  reports: Int!
+
+  #
+  author: User!
+
+  #
+  createdAt: DateTime!
+
+  #
+  comments: [Comment!]
+
+  #
+  likes: [String!]
+}
+
+#
+scalar DateTime
+
+#
+type Comment {
+  #
+  id: Int!
+
+  #
+  body: String!
+
+  #
+  author: User!
+
+  #
+  createdAt: DateTime!
+}
+
+#
+type Story {
+  #
+  id: Int!
+
+  #
+  createdAt: DateTime!
+
+  #
+  updatedAt: DateTime!
+
+  #
+  uri: String!
+
+  #
+  author: User!
+
+  #
+  views: [String!]
+
+  #
+  type: StoryType!
+}
+
+#
+enum StoryType {
+  #
+  IMAGE
+
+  #
+  VIDEO
+}
+
+#
+type Chat {
+  #
+  id: Int!
+
+  #
+  createdAt: DateTime!
+
+  #
+  updatedAt: DateTime!
+
+  #
+  participants: [User!]
+
+  #
+  messages(last: Int): [Message!]
+}
+
+#
+type Message {
+  #
+  id: Int!
+
+  #
+  type: MessageType!
+
+  #
+  asset: String
+
+  #
+  body: String
+
+  #
+  createdAt: DateTime!
+
+  #
+  seen: Boolean
+
+  #
+  author: User!
+}
+
+#
+enum MessageType {
+  #
+  TEXT
+
+  #
+  IMAGE
+
+  #
+  VIDEO
+}
+
+#
+type Notification {
+  #
+  id: Int!
+
+  #
+  resourceId: String!
+
+  #
+  user: User!
+
+  #
+  actionUser: User!
+
+  #
+  createdAt: DateTime!
+
+  #
+  type: NotificationType!
+}
+
+#
+enum NotificationType {
+  #
+  FOLLOW
+
+  #
+  COMMENT
+
+  #
+  LIKE
+}
+
+#
+enum ConnectionsType {
+  #
+  FOLLOWING
+
+  #
+  FOLLOWERS
+}
+
+#
+type Mutation {
+  #
+  createUser(
+    token: String!
+    avatar: String
+    name: String!
+    email: String!
+  ): User!
+
+  #
+  updateUser(
+    userId: Int!
+    avatar: String!
+    name: String!
+    handle: String!
+    about: String!
+  ): User!
+
+  #
+  createTemporaryChat: Chat!
+
+  #
+  connectChatToUsers(chatId: Int!, userId: String!, targetId: String!): Chat!
+
+  #
+  addChatMessage(chatId: Int!, authorId: String!, body: String!): Chat!
+
+  #
+  updateFollowing(
+    userId: Int!
+    targetId: String!
+    action: UpdateFollowingAction!
+  ): Boolean!
+
+  #
+  createPost(userId: Int!, uri: String!, caption: String): Post!
+
+  #
+  updateFcmToken(userId: Int!, fcmToken: String!): User!
+
+  #
+  addComment(userId: Int!, postId: Int!, body: String!): Post!
+
+  #
+  likeInteraction(userId: Int!, postId: Int!, action: LikeAction!): Post!
+
+  #
+  messageSeen(messageId: Int!): Message!
+
+  #
+  updateLastSeen(userId: Int!): User!
+
+  #
+  deleteChat(chatId: Int!): Chat!
+
+  #
+  reportPost(postId: Int!): Post!
+
+  #
+  editPost(postId: Int!, caption: String!): Post!
+
+  #
+  deletePost(postId: Int!): Post!
+
+  #
+  deleteComment(postId: Int!, commentId: Int!): Post!
+
+  #
+  deleteNotification(notificationId: Int!): Notification!
+
+  #
+  blockUser(from: String!, to: String!): Boolean!
+
+  #
+  unblockUser(from: String!, to: String!): Boolean!
+}
+
+#
+enum UpdateFollowingAction {
+  #
+  FOLLOW
+
+  #
+  UNFOLLOW
+}
+
+#
+enum LikeAction {
+  #
+  LIKE
+
+  #
+  UNLIKE
+}
+
+#
+type Subscription {
+  #
+  chat(chatId: Int!): Chat!
+
+  #
+  post(postId: Int!): Post!
+
+  #
+  user(userId: Int!): User!
+}
+
+#
+type BlockList {
+  #
+  id: Int!
+
+  #
+  from: String!
+
+  #
+  to: String!
+}
