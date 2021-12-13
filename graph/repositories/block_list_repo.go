@@ -19,7 +19,7 @@ func (repo *BlockListRepo) Init(db *gorm.DB) {
 func (repo *BlockListRepo) BlockUser(ctx context.Context, from, to uuid.UUID) (bool, error) {
 	blockUser := entity.BlockList{From: from, To: to}
 	repo.DB = repo.DB.WithContext(ctx)
-	err := repo.DB.Create(blockUser).Error
+	err := repo.DB.Create(&blockUser).Error
 	if err != nil {
 		return false, err
 	}

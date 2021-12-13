@@ -77,13 +77,18 @@ func ToPostModel(post *entity.Post) (*model.Post, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return &model, nil
 }
 
 func ToPostModels(posts []*entity.Post) ([]*model.Post, error) {
 	postModels := make([]*model.Post, len(posts))
 	for i, v := range posts {
-		postModels[i], _ = ToPostModel(v)
+		model, err := ToPostModel(v)
+		if err != nil {
+			return nil, err
+		}
+		postModels[i] = model
 	}
 
 	return postModels, nil

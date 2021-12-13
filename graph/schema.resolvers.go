@@ -104,7 +104,19 @@ func (r *mutationResolver) ReportPost(ctx context.Context, postID string) (*mode
 }
 
 func (r *mutationResolver) EditPost(ctx context.Context, postID string, caption string) (*model.Post, error) {
-	return r.PostResolver.EditPost(ctx, postID, caption)
+	_, err := r.PostResolver.EditPost(ctx, postID, caption)
+	if err != nil {
+		return nil, err
+	}
+	postUpdated, err := r.PostResolver.Post(ctx, postID)
+	if err != nil {
+		return nil, err
+	}
+	postChan, ok := r.PostChannels[postID]
+	if ok {
+		postChan <- postUpdated
+	}
+	return postUpdated, err
 }
 
 func (r *mutationResolver) DeletePost(ctx context.Context, postID string) (*model.Post, error) {

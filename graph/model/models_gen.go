@@ -29,6 +29,12 @@ type Comment struct {
 	CreatedAt string `json:"createdAt"`
 }
 
+type Like struct {
+	PostID string     `json:"postId"`
+	UserID string     `json:"userId"`
+	Action LikeAction `json:"action"`
+}
+
 type Message struct {
 	ID        string      `json:"id"`
 	Type      MessageType `json:"type"`
@@ -56,7 +62,7 @@ type Post struct {
 	Author    *User      `json:"author"`
 	CreatedAt string     `json:"createdAt"`
 	Comments  []*Comment `json:"comments"`
-	Likes     []string   `json:"likes"`
+	Likes     []*Like    `json:"likes"`
 }
 
 type Story struct {

@@ -66,6 +66,12 @@ type ComplexityRoot struct {
 		ID        func(childComplexity int) int
 	}
 
+	Like struct {
+		Action func(childComplexity int) int
+		PostID func(childComplexity int) int
+		UserID func(childComplexity int) int
+	}
+
 	Message struct {
 		Asset     func(childComplexity int) int
 		Author    func(childComplexity int) int
@@ -322,6 +328,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Comment.ID(childComplexity), true
+
+	case "Like.action":
+		if e.complexity.Like.Action == nil {
+			break
+		}
+
+		return e.complexity.Like.Action(childComplexity), true
+
+	case "Like.postId":
+		if e.complexity.Like.PostID == nil {
+			break
+		}
+
+		return e.complexity.Like.PostID(childComplexity), true
+
+	case "Like.userId":
+		if e.complexity.Like.UserID == nil {
+			break
+		}
+
+		return e.complexity.Like.UserID(childComplexity), true
 
 	case "Message.asset":
 		if e.complexity.Message.Asset == nil {
@@ -1296,7 +1323,13 @@ type Post {
   comments: [Comment!]
 
   #
-  likes: [String!]
+  likes: [Like!]
+}
+
+type Like {
+  postId: String!
+  userId: String!
+  action: LikeAction!
 }
 
 #
@@ -2917,6 +2950,111 @@ func (ec *executionContext) _Comment_createdAt(ctx context.Context, field graphq
 	return ec.marshalNDateTime2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Like_postId(ctx context.Context, field graphql.CollectedField, obj *model.Like) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Like",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PostID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Like_userId(ctx context.Context, field graphql.CollectedField, obj *model.Like) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Like",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Like_action(ctx context.Context, field graphql.CollectedField, obj *model.Like) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Like",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Action, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.LikeAction)
+	fc.Result = res
+	return ec.marshalNLikeAction2proximityᚋgraphᚋmodelᚐLikeAction(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Message_id(ctx context.Context, field graphql.CollectedField, obj *model.Message) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -4469,9 +4607,9 @@ func (ec *executionContext) _Post_likes(ctx context.Context, field graphql.Colle
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]string)
+	res := resTmp.([]*model.Like)
 	fc.Result = res
-	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
+	return ec.marshalOLike2ᚕᚖproximityᚋgraphᚋmodelᚐLikeᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_signIn(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -7345,6 +7483,43 @@ func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, 
 	return out
 }
 
+var likeImplementors = []string{"Like"}
+
+func (ec *executionContext) _Like(ctx context.Context, sel ast.SelectionSet, obj *model.Like) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, likeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Like")
+		case "postId":
+			out.Values[i] = ec._Like_postId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "userId":
+			out.Values[i] = ec._Like_userId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "action":
+			out.Values[i] = ec._Like_action(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var messageImplementors = []string{"Message"}
 
 func (ec *executionContext) _Message(ctx context.Context, sel ast.SelectionSet, obj *model.Message) graphql.Marshaler {
@@ -8411,6 +8586,16 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
+func (ec *executionContext) marshalNLike2ᚖproximityᚋgraphᚋmodelᚐLike(ctx context.Context, sel ast.SelectionSet, v *model.Like) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Like(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNLikeAction2proximityᚋgraphᚋmodelᚐLikeAction(ctx context.Context, v interface{}) (model.LikeAction, error) {
 	var res model.LikeAction
 	err := res.UnmarshalGQL(v)
@@ -9025,6 +9210,53 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 		return graphql.Null
 	}
 	return graphql.MarshalInt(*v)
+}
+
+func (ec *executionContext) marshalOLike2ᚕᚖproximityᚋgraphᚋmodelᚐLikeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Like) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNLike2ᚖproximityᚋgraphᚋmodelᚐLike(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) marshalOMessage2ᚕᚖproximityᚋgraphᚋmodelᚐMessageᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Message) graphql.Marshaler {

@@ -25,7 +25,11 @@ func (rsv *ChatResolver) CreateTemporaryChat(ctx context.Context, userID string)
 	if err != nil {
 		return nil, err
 	}
-	return utils.ToChatModel(rs)
+	chatRs, err := rsv.ChatRepo.FindById(ctx, rs.ID)
+	if err != nil {
+		return nil, err
+	}
+	return utils.ToChatModel(chatRs)
 }
 
 func (rsv *ChatResolver) ConnectChatToUsers(ctx context.Context, chatID string, userID string, targetID string) (*model.Chat, error) {

@@ -121,7 +121,13 @@ type Post {
   comments: [Comment!]
 
   #
-  likes: [String!]
+  likes: [Like!]
+}
+
+type Like {
+  postId: String!
+  userId: String!
+  action: LikeAction!
 }
 
 #

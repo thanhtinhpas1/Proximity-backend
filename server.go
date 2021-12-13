@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gorilla/websocket"
@@ -45,7 +44,7 @@ var newLogger = logger.New(
 	log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 	logger.Config{
 		SlowThreshold:             time.Second, // Slow SQL threshold
-		LogLevel:                  logger.Info, // Log level
+		LogLevel:                  logger.Warn, // Log level
 		IgnoreRecordNotFoundError: false,       // Ignore ErrRecordNotFound error for logger
 		Colorful:                  true,        // Disable color
 	},
@@ -81,12 +80,12 @@ func main() {
 	messageRepo.Init(db)
 	messageResolver := &resolvers.MessageResolver{MessageRepo: messageRepo}
 
-	commentRepo := &repositories.CommentRepo{}
-	commentRepo.Init(db)
-	commentResolver := &resolvers.CommentResolver{CommentRepo: commentRepo, PostRepo: &repositories.PostRepo{}}
-
 	postRepo := &repositories.PostRepo{}
 	postRepo.Init(db)
+	commentRepo := &repositories.CommentRepo{}
+	commentRepo.Init(db)
+	commentResolver := &resolvers.CommentResolver{CommentRepo: commentRepo, PostRepo: postRepo}
+
 	likeRepo := &repositories.LikeRepo{}
 	likeRepo.Init(db)
 	postResolver := &resolvers.PostResolver{PostRepo: postRepo, LikeRepo: likeRepo, CommentRepo: commentRepo}
@@ -123,9 +122,6 @@ func main() {
 			},
 		},
 	})
-
-	srv.Use(extension.Introspection{})
-
 	http.Handle("/query", playground.Handler("GraphQL playground", "/"))
 	http.Handle("/", srv)
 

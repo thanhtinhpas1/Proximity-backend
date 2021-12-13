@@ -17,20 +17,20 @@ func (repo *PostRepo) Init(db *gorm.DB) {
 	repo.BaseRepo.Init(db, "posts")
 }
 
-func (repo *PostRepo) Insert(ctx context.Context, entity entity.Post) (*entity.Post, error) {
+func (repo *PostRepo) Insert(ctx context.Context, entity *entity.Post) (*entity.Post, error) {
 	repo.DB = repo.DB.WithContext(ctx)
 	rs := repo.BaseRepo.Insert(entity)
 	if rs.Error != nil {
 		return nil, rs.Error
 	}
 
-	return &entity, nil
+	return entity, nil
 }
 
 func (repo *PostRepo) FindById(ctx context.Context, id uuid.UUID) (*entity.Post, error) {
 	post := &entity.Post{}
 	repo.DB = repo.DB.WithContext(ctx)
-	err := repo.BaseRepo.DB.Preload("Comments.Author").Preload(clause.Associations).Find(post, "id = ?", id).Error
+	err := repo.DB.Preload("Comments.Author").Preload(clause.Associations).Find(post, "id = ?", id).Error
 	if err != nil {
 		return nil, err
 	}
@@ -41,6 +41,17 @@ func (repo *PostRepo) FindAllByUserId(ctx context.Context, userId uuid.UUID, off
 	posts := []*entity.Post{}
 	repo.DB = repo.DB.WithContext(ctx)
 	rs := repo.DB.Offset(offset).Limit(limit).Preload(clause.Associations).Find(&posts, "user_id = ?", userId)
+	if rs.Error != nil {
+		return nil, rs.Error
+	}
+
+	return posts, nil
+}
+
+func (repo *PostRepo) FindUserFeeds(ctx context.Context, userId uuid.UUID, offset, limit int) ([]*entity.Post, error) {
+	posts := []*entity.Post{}
+	repo.DB = repo.DB.WithContext(ctx)
+	rs := repo.DB.Offset(offset).Limit(limit).Preload(clause.Associations).Joins("LEFT JOIN user_followings ON posts.user_id = user_followings.following_id AND (user_followings.following_id = ? OR posts.user_id = ?)", userId, userId).Find(&posts)
 	if rs.Error != nil {
 		return nil, rs.Error
 	}

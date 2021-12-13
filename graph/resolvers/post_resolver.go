@@ -27,7 +27,16 @@ func (rsv *PostResolver) Post(ctx context.Context, id string) (*model.Post, erro
 
 func (rsv *PostResolver) Posts(ctx context.Context, userID string, offset, limit int) ([]*model.Post, error) {
 	parsedUserId, _ := uuid.Parse(userID)
-	posts, err := rsv.PostRepo.FindAllByUserId(ctx, parsedUserId, offset, limit)
+	posts, err := rsv.PostRepo.FindUserFeeds(ctx, parsedUserId, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+	return utils.ToPostModels(posts)
+}
+
+func (rsv *PostResolver) UserFeed(ctx context.Context, userID string, offset, limit int) ([]*model.Post, error) {
+	parsedUserId, _ := uuid.Parse(userID)
+	posts, err := rsv.PostRepo.FindUserFeeds(ctx, parsedUserId, offset, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +49,7 @@ func (rsv *PostResolver) CreatePost(ctx context.Context, userID string, uri stri
 		return nil, err
 	}
 	post := entity.Post{UserID: parsedUserId, URI: uri, Caption: caption}
-	rs, err := rsv.PostRepo.Insert(ctx, post)
+	rs, err := rsv.PostRepo.Insert(ctx, &post)
 	if err != nil {
 		return nil, err
 	}

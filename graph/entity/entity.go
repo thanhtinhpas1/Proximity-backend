@@ -20,8 +20,8 @@ type Chat struct {
 	UpdatedAt    time.Time `json:"updatedAt,omitempty"`
 	UserID       uuid.UUID `json:"userID,omitempty" gorm:"type:uuid;"`
 	Author       *User     `json:"author,omitempty" gorm:"foreignKey:UserID;"`
-	Participants []User    `json:"participants,omitempty" gorm:"many2many:chat_participants;"`
-	Messages     []Message `json:"messages,omitempty"`
+	Participants []User    `json:"participants" gorm:"many2many:chat_participants;"`
+	Messages     []Message `json:"messages"`
 }
 
 type Participant struct {
@@ -71,14 +71,14 @@ type Post struct {
 	UserID    uuid.UUID `json:"userID,omitempty" gorm:"type:uuid;"`
 	Author    *User     `json:"author,omitempty" gorm:"foreignKey:UserID;"`
 	CreatedAt time.Time `json:"createdAt,omitempty"`
-	Comments  []Comment `json:"comments,omitempty" gorm:"foreignKey:PostID"`
-	Likes     []Like    `json:"likes,omitempty" gorm:"foreignKey:PostID"`
+	Comments  []Comment `json:"comments" gorm:"foreignKey:PostID"`
+	Likes     []Like    `json:"likes" gorm:"foreignKey:PostID"`
 	Deleted   gorm.DeletedAt
 }
 
 type Like struct {
-	PostID uuid.UUID `json:"post_id,omitempty" gorm:"primarykey;type:uuid;"`
-	UserID uuid.UUID `json:"user_id,omitempty" gorm:"primarykey;type:uuid;"`
+	PostID uuid.UUID `json:"postId,omitempty" gorm:"primarykey;type:uuid;"`
+	UserID uuid.UUID `json:"userId,omitempty" gorm:"primarykey;type:uuid;"`
 	Action string    `json:"action,omitempty"`
 }
 
@@ -103,12 +103,12 @@ type User struct {
 	Email         string         `json:"email,omitempty" gorm:"unique"`
 	LastSeen      float64        `json:"lastSeen,omitempty"`
 	About         *string        `json:"about,omitempty"`
-	Posts         []Post         `json:"posts,omitempty" gorm:"foreignKey:UserID"`
-	Stories       []Story        `json:"stories,omitempty" gorm:"foreignKey:UserID"`
-	Following     []User         `json:"following,omitempty" gorm:"many2many:user_followings;"`
-	Followers     []User         `json:"followers,omitempty" gorm:"many2many:user_followers;"`
-	Chats         []Chat         `json:"chats,omitempty" gorm:"foreignKey:UserID"`
-	Notifications []Notification `json:"notifications,omitempty" gorm:"foreignKey:UserID"`
+	Posts         []Post         `json:"posts" gorm:"foreignKey:UserID"`
+	Stories       []Story        `json:"stories" gorm:"foreignKey:UserID"`
+	Following     []User         `json:"following" gorm:"many2many:user_followings;"`
+	Followers     []User         `json:"followers" gorm:"many2many:user_followers;"`
+	Chats         []Chat         `json:"chats" gorm:"foreignKey:UserID"`
+	Notifications []Notification `json:"notifications" gorm:"foreignKey:UserID"`
 }
 
 type UserFollowing struct {

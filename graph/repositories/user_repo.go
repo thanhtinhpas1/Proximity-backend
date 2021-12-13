@@ -4,6 +4,7 @@ import (
 	"context"
 	"proximity/graph/constants"
 	"proximity/graph/entity"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -81,7 +82,7 @@ func (repo *UserRepo) SearchUsers(ctx context.Context, userId uuid.UUID, name st
 
 	users := make([]*entity.User, constants.DEFAULT_LIMIT)
 	// TODO: Optimize query
-	rs := repo.DB.Limit(constants.DEFAULT_LIMIT).Find(&users, "name LIKE ?", name+"%")
+	rs := repo.DB.Limit(constants.DEFAULT_LIMIT).Find(&users, "UPPER(name) LIKE ?", strings.ToUpper(name)+"%")
 	if rs.Error != nil {
 		return nil, rs.Error
 	}
@@ -106,10 +107,10 @@ func (repo *UserRepo) UpdateLastSeen(ctx context.Context, userId uuid.UUID) (*en
 	return user, nil
 }
 
-func (repo *UserRepo) LikeUsers(ctx context.Context, likes []uuid.UUID) ([]*entity.User, error) {
+func (repo *UserRepo) LikeUsers(ctx context.Context, likes []string) ([]*entity.User, error) {
 	repo.DB = repo.DB.WithContext(ctx)
 	users := []*entity.User{}
-	err := repo.DB.Find(&users, likes).Error
+	err := repo.DB.Find(&users, "id IN ?", likes).Error
 	if err != nil {
 		return nil, err
 	}

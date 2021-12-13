@@ -156,12 +156,12 @@ func (rsv *UserResolver) User(ctx context.Context, userID string) (*model.User, 
 }
 
 func (rsv *UserResolver) LikeUsers(ctx context.Context, likes []string) ([]*model.User, error) {
-	likeUuids, err := utils.ToUuids(likes)
-	if err != nil {
-		return nil, err
-	}
+	// likeUuids, err := utils.ToUuids(likes)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	users, err := rsv.UserRepo.LikeUsers(ctx, likeUuids)
+	users, err := rsv.UserRepo.LikeUsers(ctx, likes)
 	if err != nil {
 		return nil, err
 	}
